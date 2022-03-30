@@ -1,7 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
 
-from orm import Base, db, Session, Client, Visit
+from orm_method.orm import Base, db, Session, Client, Visit
 
 
 def create_new_client(first_name, last_name, phone_number, anames):
@@ -19,8 +19,6 @@ def create_new_client(first_name, last_name, phone_number, anames):
 def search_client(first_name, last_name):
     sesion = Session()
     search = sesion.query(Client).filter_by(first_name=first_name, last_name=last_name).first()
-    print(search)
-    sesion.commit()
     sesion.close()
     return search
 
@@ -37,3 +35,6 @@ def add_mew_visit(client_id, date, time_visit, procedure, photo_preparation, pho
     session.add(new_visit)
     session.commit()
     session.close()
+
+
+print(search_client('Данил', "Рощенко"))

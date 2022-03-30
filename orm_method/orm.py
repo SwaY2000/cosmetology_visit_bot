@@ -71,18 +71,14 @@ class Visit(Base):
         Text,
         comment='Процедура',
     )
-    photo_preparation = image_attachment('PhotoPreparation')
-    photo_after_procedure = image_attachment('PhotoAfterProcedure')
-
-class PhotoPreparation(Base, Image):
-    __tablename__ = 'photo_preparation'
-    id_photo = Column(Integer, ForeignKey('visit.id_visit'))
-    visit = relationship('Visit')
-
-class PhotoAfterProcedure(Base, Image):
-    __tablename__ = 'photo_after_procedure'
-    id_photo = Column(Integer, ForeignKey('visit.id_visit'))
-    visit = relationship('Visit')
+    path_to_photo_sticker = Column(
+        String(100),
+        comment='Путь к фото стикера'
+    )
+    path_to_photo_after_procedure = Column(
+        String(100),
+        comment='Путь к фото после '
+    )
 
 db = create_engine('sqlite:///beauty_anatomy.db')
 Base.metadata.create_all(db)

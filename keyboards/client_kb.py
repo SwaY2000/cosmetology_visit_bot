@@ -1,12 +1,12 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from datetime import date
-############
 
 def check_client_in_db():
     inline = InlineKeyboardMarkup(row_width=2)
     [inline.insert(InlineKeyboardButton(text=str(element), callback_data=callback_data))
      for element, callback_data in zip(['Да', 'Нет'], ['yes', 'not'])]
+    print(inline)
     return inline
 
 def chooce_year(reanswear: str=None):
