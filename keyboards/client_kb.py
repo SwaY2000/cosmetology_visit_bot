@@ -42,10 +42,10 @@ def choose_day_in_month(month: str):
 def choose_time():
     inline = InlineKeyboardMarkup(row_width=2)
     for element in range(9, 22):
-        element = InlineKeyboardButton(text=f'{element}:00', callback_data=f'{element}:00')
-        inline.insert(element)
-        element = InlineKeyboardButton(text=f'{element}:30', callback_data=f'{element}:30')
-        inline.insert(element)
+        keyboard = InlineKeyboardButton(text=f'{element}:00', callback_data=f'{element}:00')
+        inline.insert(keyboard)
+        keyboard = InlineKeyboardButton(text=f'{element}:30', callback_data=f'{element}:30')
+        inline.insert(keyboard)
     return inline
 
 def choose_new_client_or_not():
