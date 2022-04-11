@@ -6,7 +6,8 @@ from aiogram.types.callback_query import CallbackQuery
 
 from help.help_file import dp, bot
 from keyboards.client_kb import check_client_in_db, chooce_year, choose_month, choose_day_in_month, \
-    choose_new_client_or_not, choose_time, choose_alphabet_for_search, choose_client_in_db, inline_cancel
+    choose_new_client_or_not, choose_time, choose_alphabet_for_search, choose_client_in_db, inline_cancel, \
+    inline_date_visit
 from orm_method.orm_fucntion import *
 
 class FSMVisit(StatesGroup):
@@ -24,6 +25,7 @@ class FSMVisit(StatesGroup):
 class FSMHistory(StatesGroup):
     letter = State()
     client = State()
+    history = State()
 
 async def start_add_visit(message: types.Message):
     """Kb inline, entry client in db?"""
@@ -147,8 +149,7 @@ async def callback_cancel_after_procedure(callback_query: types.CallbackQuery, s
     await callback_query.message.reply('Готово')
     await state.finish()
 
-
-def start_view_history_visit(message: types.Message):
+async def start_view_history_visit(message: types.Message):
     await FSMHistory.next()
     await message.reply('Выберите букву, на которую начинается фамилия клиента',
                         reply_markup=choose_alphabet_for_search())
@@ -161,10 +162,36 @@ async def callback_choose_letter_for_search(callback_query: types.CallbackQuery,
 
 async def callback_choose_client(callback_query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
-        data['client'] = search_client(callback_query.data[callback_query.data.index(' ')+1:],
-                                       callback_query.data[:callback_query.data.index(' ')]).client_id
-    await callback_query.message.reply('Выберите букву, на которую начинается фамилия клиента',
-                                       reply_markup=choose_client_in_db(callback_query.data))
+        data['client'] = [search_client(callback_query.data[callback_query.data.index(' ')+1:],
+                                       callback_query.data[:callback_query.data.index(' ')]).last_name,
+                          search_client(callback_query.data[callback_query.data.index(' ') + 1:],
+                                        callback_query.data[:callback_query.data.index(' ')]).first_name
+                          ]
+    await callback_query.message.reply('Выберите дату визита',
+                                       reply_markup=inline_date_visit(callback_query.data))#add cancel
+
+async def callback_history_visit(callback_query: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        temp_db = search_history_visit_client_filter_by_date(data['history'], callback_query.data)
+    media = None
+    if temp_db.path_to_photo_sticker is not None:
+        media = types.MediaGroup()
+        media.attach_photo(types.InputFile('path_to_photo'), 'Фотография стикера')
+        if temp_db.path_to_photo_after_procedure is not None:
+            media.attach_photo(types.InputFile('path_to_photo'), 'Фотография после процедуры')
+
+    elif temp_db.path_to_photo_after_procedure is not None:
+        media = types.MediaGroup()
+        media.attach_photo(types.InputFile('path_to_photo'), 'Фотография после процедуры')
+    #add if cancel dont call
+    async with state.proxy() as data:
+        data['history'] = callback_query.data
+        await callback_query.message.reply(f'Клиент: {data["client"][0]}, {data["client"][0]} \n'
+                                           f'Процедура: {temp_db.procedure} \n'
+                                           f'Время визита: {temp_db.time_visit}',
+                                           reply_markup=inline_cancel())
+        if media is not None:
+            await bot.send_media_group(callback_query.message.chat.id, media=media)
 
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(start_add_visit, commands=['add'], state=None)
@@ -187,4 +214,5 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(start_add_visit, commands=['history'], state=None)
     dp.register_callback_query_handler(callback_choose_letter_for_search, state=FSMHistory.letter)
     dp.register_callback_query_handler(callback_choose_client, state=FSMHistory.client)
+    dp.register_callback_query_handler(callback_history_visit, state=FSMHistory.history)
 

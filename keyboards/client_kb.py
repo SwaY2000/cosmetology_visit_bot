@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from datetime import date
 
-from orm_method.orm_fucntion import search_client_with_alphabet
+from orm_method.orm_fucntion import search_client_with_alphabet, search_history_visit_client
 
 
 def check_client_in_db():
@@ -74,4 +74,10 @@ def choose_client_in_db(letter):
 def inline_cancel():
     inline = InlineKeyboardMarkup(row_width=1)
     inline.insert(InlineKeyboardButton(text='Фото не требуется', callback_data='None'))
+    return inline
+
+def inline_date_visit(client_id):
+    inline = InlineKeyboardButton(row_width=2)
+    for element in search_history_visit_client(client_id):
+        inline.insert(InlineKeyboardButton(text=element.date, callback_data=element.date))
     return inline
