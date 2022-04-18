@@ -48,23 +48,20 @@ def search_last_visit_id():
     session.close()
     return search.id_visit
 
-def search_history_visit_client(client_id: int):
+def search_history_visit_client(client_id):
     session = Session()
     search = session.query(Visit).filter_by(client_id=client_id).all()
     session.close()
     return search
 
-def search_history_visit_client_filter_by_date(client_id: list, date: str):
+def search_history_visit_client_filter_by_date(client_id, date):
     session = Session()
-    search = session.query(Visit).filter_by(client_id=search_client(client_id[0],
-                                                                    client_id[1]).client_id, date=date)[-1]
+    search = session.query(Visit).filter_by(client_id=search_client(client_id[1], client_id[0]).client_id, date=date).all()
     session.close()
     return search
-
-# create_new_client('Данил','Рощенко','+380994415656','Аналгин')
 
 # for i in range(10):
 #     add_new_visit(1, f'2022-11-{i}', 'test', 'test', None, None)
 # search_last_visit_id()
-# for i in search_history_visit_client_filter_by_date(['Рощенко', 'Данил'], '2022-11-9'):
-#     print(i.procedure)
+for i in search_history_visit_client_filter_by_date(1, '2022-11-9'):
+    print(i.procedure)
